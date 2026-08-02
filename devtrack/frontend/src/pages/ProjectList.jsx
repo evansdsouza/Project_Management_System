@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { listProjects, createProject } from '../api/projects';
+import { listRequirements } from '../api/requirements';
 import { Button } from '../components/Button';
 import { Modal } from '../components/Modal';
 import { FormField } from '../components/FormField';
@@ -10,20 +11,26 @@ import { useToast } from '../components/ToastProvider';
 
 function useProjects() {
   const [data, setData] = useState(null);
+  const [requirements, setRequirements] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const refetch = useCallback(() => {
     setLoading(true);
-    listProjects()
-      .then(setData)
+    // One unfiltered requirements call, grouped per project below — avoids
+    // firing a separate request for every row.
+    Promise.all([listProjects(), listRequirements(undefined)])
+      .then(([projects, reqs]) => {
+        setData(projects);
+        setRequirements(reqs);
+      })
       .catch(setError)
       .finally(() => setLoading(false));
   }, []);
 
   useEffect(() => { refetch(); }, [refetch]);
 
-  return { data, loading, error, refetch };
+  return { data, requirements, loading, error, refetch };
 }
 
 function CreateProjectModal({ open, onClose, onCreated }) {
@@ -84,9 +91,16 @@ function CreateProjectModal({ open, onClose, onCreated }) {
 }
 
 export default function ProjectList() {
-  const { data, loading, refetch } = useProjects();
+  const { data, requirements, loading, refetch } = useProjects();
   const [modalOpen, setModalOpen] = useState(false);
   const navigate = useNavigate();
+
+  const statsFor = (projectId) => {
+    const owned = requirements.filter((r) => r.project_id === projectId);
+    const done = owned.filter((r) => r.status === 'Done').length;
+    const progress = owned.length === 0 ? 0 : Math.round((done / owned.length) * 100);
+    return { count: owned.length, progress };
+  };
 
   return (
     <div>
@@ -123,19 +137,22 @@ export default function ProjectList() {
             </tr>
           </thead>
           <tbody>
-            {data.map((project) => (
-              <tr
-                key={project.id}
-                className="border-b border-gray-100 hover:bg-gray-50 cursor-pointer"
-                onClick={() => navigate(`/projects/${project.id}`)}
-              >
-                <td className="py-2">{project.name}</td>
-                <td className="py-2 text-gray-400">—</td>
-                <td className="py-2 text-gray-400">—</td>
-                <td className="py-2 text-gray-400">—</td>
-                <td className="py-2">{new Date(project.created_at).toLocaleDateString()}</td>
-              </tr>
-            ))}
+            {data.map((project) => {
+              const stats = statsFor(project.id);
+              return (
+                <tr
+                  key={project.id}
+                  className="border-b border-gray-100 hover:bg-gray-50 cursor-pointer"
+                  onClick={() => navigate(`/projects/${project.id}`)}
+                >
+                  <td className="py-2">{project.name}</td>
+                  <td className="py-2">{stats.progress}%</td>
+                  <td className="py-2">{stats.count}</td>
+                  <td className="py-2 text-gray-400">—</td>
+                  <td className="py-2">{new Date(project.created_at).toLocaleDateString()}</td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       )}

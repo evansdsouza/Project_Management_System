@@ -14,9 +14,9 @@ load_dotenv()
 
 from app.database import Base  # noqa: E402
 
-# Import every model here so Base.metadata is fully populated for
-# autogenerate — added incrementally as each entity is built.
-from app.models.project import Project  # noqa: E402,F401
+# app.models imports every model, so Base.metadata is fully populated
+# for autogenerate.
+import app.models  # noqa: E402,F401
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
