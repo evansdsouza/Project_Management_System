@@ -18,6 +18,5 @@ class Project(Base):
     requirements: Mapped[list["Requirement"]] = relationship(
         back_populates="project", cascade="all, delete-orphan"
     )
-    # relationships to Bug and TimeLog are added here as each entity is
-    # built (Phase 3, 5) — SQLAlchemy can't resolve a string reference to
-    # a class that doesn't exist yet when mappers configure.
+    bugs: Mapped[list["Bug"]] = relationship(back_populates="project", cascade="all, delete-orphan")
+    # relationship to TimeLog is added in Phase 5
