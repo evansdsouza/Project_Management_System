@@ -127,12 +127,14 @@ export function HourGrid({
                       width: `calc(${widthPct}% - 4px)`,
                     }}
                   >
+                    {/* Title leads; project is now optional, so a null
+                        project_id no longer implies the project was deleted
+                        and can't be labelled as such. */}
                     <div className="font-medium truncate">
-                      {entry.project_name ?? 'Deleted project'}
+                      {entry.title || entry.project_name || 'Untitled'}
                     </div>
-                    {/* hours is shown explicitly because it is deliberately
-                        independent of the block's visual span. */}
                     <div className="opacity-75 truncate">
+                      {entry.title && entry.project_name ? `${entry.project_name} · ` : ''}
                       {Number(entry.hours).toFixed(2)} h
                     </div>
                   </button>

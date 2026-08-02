@@ -1,4 +1,5 @@
-from datetime import date
+from datetime import date, time
+from decimal import Decimal, ROUND_HALF_UP
 
 from sqlalchemy.orm import Session, joinedload
 
@@ -6,8 +7,23 @@ from app.models.time_log import TimeLog
 from app.schemas.time_log import TimeLogCreate, TimeLogUpdate
 
 
+def compute_hours(start: time, end: time) -> Decimal:
+    """Derives `hours` from the span. The single writer of that column — it is
+    never taken from the client, so the two can't drift apart.
+
+    Quantized to 2dp to match NUMERIC(5,2); the DB would round anyway, and
+    doing it here keeps the value returned on create identical to the one a
+    later read produces.
+    """
+    minutes = (end.hour * 60 + end.minute) - (start.hour * 60 + start.minute)
+    return (Decimal(minutes) / Decimal(60)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+
 def create_time_log(db: Session, data: TimeLogCreate) -> TimeLog:
-    time_log = TimeLog(**data.model_dump())
+    time_log = TimeLog(
+        **data.model_dump(),
+        hours=compute_hours(data.start_time, data.end_time),
+    )
     db.add(time_log)
     db.commit()
     db.refresh(time_log)
@@ -51,6 +67,10 @@ def get_time_log(db: Session, time_log_id: int) -> TimeLog | None:
 def update_time_log(db: Session, time_log: TimeLog, data: TimeLogUpdate) -> TimeLog:
     for field, value in data.model_dump(exclude_unset=True).items():
         setattr(time_log, field, value)
+    # Recompute after applying the patch, not from the request: an update that
+    # moves only one end of the span still has to be measured against the
+    # stored value on the other end.
+    time_log.hours = compute_hours(time_log.start_time, time_log.end_time)
     db.commit()
     db.refresh(time_log)
     return time_log

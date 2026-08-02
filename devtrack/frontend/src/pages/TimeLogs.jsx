@@ -37,11 +37,11 @@ function TimeLogModal({ open, onClose, onSaved, onDelete, timeLog, projects, def
       ? toTimeInputValue(timeLog.start_time)
       : (defaults?.start_time ?? '09:00');
     setForm({
+      title: timeLog?.title ?? '',
       project_id: timeLog?.project_id ? String(timeLog.project_id) : '',
       logged_date: timeLog?.logged_date ?? defaults?.logged_date ?? todayStr(),
       start_time: start,
       end_time: timeLog ? toTimeInputValue(timeLog.end_time) : addMinutesToTimeStr(start, 60),
-      hours: timeLog?.hours ?? '1',
       client: timeLog?.client ?? '',
       description: timeLog?.description ?? '',
     });
@@ -49,6 +49,14 @@ function TimeLogModal({ open, onClose, onSaved, onDelete, timeLog, projects, def
   }, [open, timeLog, defaults]);
 
   const set = (field) => (e) => setForm((f) => ({ ...f, [field]: e.target.value }));
+
+  // Mirrors the server's derivation so the figure updates as you type. The
+  // server recomputes it authoritatively on save — this is display only.
+  const spanHours = (() => {
+    if (!form.start_time || !form.end_time) return null;
+    const mins = timeStrToMinutes(form.end_time) - timeStrToMinutes(form.start_time);
+    return mins > 0 ? (mins / 60).toFixed(2) : null;
+  })();
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -63,12 +71,13 @@ function TimeLogModal({ open, onClose, onSaved, onDelete, timeLog, projects, def
     }
 
     setSubmitting(true);
+    // hours is intentionally not sent — the server derives it from the span.
     const payload = {
+      title: form.title || null,
       project_id: form.project_id ? Number(form.project_id) : null,
       logged_date: form.logged_date || null,
       start_time: form.start_time || null,
       end_time: form.end_time || null,
-      hours: form.hours === '' ? null : Number(form.hours),
       client: form.client || null,
       description: form.description || null,
     };
@@ -93,9 +102,17 @@ function TimeLogModal({ open, onClose, onSaved, onDelete, timeLog, projects, def
   return (
     <Modal open={open} onClose={onClose} title={isEdit ? 'Edit Time Log' : 'Add Time Log'}>
       <form onSubmit={handleSubmit}>
-        <FormField label="Project" error={fieldErrors.project_id}>
+        <FormField label="Title" error={fieldErrors.title}>
+          <input
+            className={INPUT_CLASS}
+            value={form.title ?? ''}
+            onChange={set('title')}
+            placeholder="What did you work on?"
+          />
+        </FormField>
+        <FormField label="Project (optional)" error={fieldErrors.project_id}>
           <select className={INPUT_CLASS} value={form.project_id ?? ''} onChange={set('project_id')}>
-            <option value="">Select a project</option>
+            <option value="">No project</option>
             {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
           </select>
         </FormField>
@@ -110,13 +127,12 @@ function TimeLogModal({ open, onClose, onSaved, onDelete, timeLog, projects, def
             <input type="time" className={INPUT_CLASS} value={form.end_time ?? ''} onChange={set('end_time')} />
           </FormField>
         </div>
-        <FormField label="Hours logged" error={fieldErrors.hours}>
-          <input type="number" step="0.25" min="0" className={INPUT_CLASS} value={form.hours ?? ''} onChange={set('hours')} />
-        </FormField>
-        <p className="text-sm text-gray-500 -mt-2 mb-4">
-          Counted toward your daily total. It can be less than the start–end span
-          if you weren&apos;t working the whole time.
-        </p>
+        <div className="flex items-baseline justify-between mb-4 px-3 py-2 bg-gray-50 rounded">
+          <span className="text-sm font-medium text-gray-700">Hours logged</span>
+          <span className="text-sm text-gray-900" data-testid="computed-hours">
+            {spanHours ? `${spanHours} h` : '—'}
+          </span>
+        </div>
         <FormField label="Client" error={fieldErrors.client}>
           <input className={INPUT_CLASS} value={form.client ?? ''} onChange={set('client')} />
         </FormField>

@@ -32,13 +32,12 @@ class TimeLog(Base):
         ForeignKey("requirements.id", ondelete="SET NULL")
     )
     bug_id: Mapped[int | None] = mapped_column(ForeignKey("bugs.id", ondelete="SET NULL"))
+    title: Mapped[str | None] = mapped_column(Text)
     client: Mapped[str | None] = mapped_column(Text)
     description: Mapped[str | None] = mapped_column(Text)
-    # `hours` is deliberately INDEPENDENT of the start_time→end_time span, not
-    # derived from it: the span says where the block sits on the calendar grid,
-    # `hours` is the accounting figure that day totals and reports sum. So
-    # 09:00–17:00 with hours=2 is legal and intentional — don't "fix" this into
-    # a computed field.
+    # Derived from the start_time→end_time span and written by the CRUD layer,
+    # never supplied by the client. Stored rather than computed on read because
+    # day totals and the Reports aggregates sum it directly.
     hours: Mapped[Decimal] = mapped_column(Numeric(5, 2), nullable=False)
     logged_date: Mapped[date] = mapped_column(Date, nullable=False, index=True)
     start_time: Mapped[time] = mapped_column(Time, nullable=False)
