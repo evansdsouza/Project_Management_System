@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { listProjects, createProject } from '../api/projects';
+import { listProjects, createProject, getProjectProgress } from '../api/projects';
 import { listRequirements } from '../api/requirements';
 import { listBugs } from '../api/bugs';
 import { Button } from '../components/Button';
@@ -14,18 +14,29 @@ function useProjects() {
   const [data, setData] = useState(null);
   const [requirements, setRequirements] = useState([]);
   const [bugs, setBugs] = useState([]);
+  const [progressById, setProgressById] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const refetch = useCallback(() => {
     setLoading(true);
-    // One unfiltered call each, grouped per project below — avoids firing
-    // separate requests for every row.
+    // One unfiltered call each for the count columns — avoids firing
+    // separate list requests per row. Progress comes from the server's
+    // endpoint so the formula isn't duplicated here.
     Promise.all([listProjects(), listRequirements(undefined), listBugs(undefined)])
-      .then(([projects, reqs, bugList]) => {
+      .then(async ([projects, reqs, bugList]) => {
         setData(projects);
         setRequirements(reqs);
         setBugs(bugList);
+
+        const results = await Promise.all(
+          projects.map((p) =>
+            getProjectProgress(p.id)
+              .then((d) => [p.id, d.progress])
+              .catch(() => [p.id, 0])
+          )
+        );
+        setProgressById(Object.fromEntries(results));
       })
       .catch(setError)
       .finally(() => setLoading(false));
@@ -33,12 +44,13 @@ function useProjects() {
 
   useEffect(() => { refetch(); }, [refetch]);
 
-  return { data, requirements, bugs, loading, error, refetch };
+  return { data, requirements, bugs, progressById, loading, error, refetch };
 }
 
 function CreateProjectModal({ open, onClose, onCreated }) {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
+  const [deadline, setDeadline] = useState('');
   const [fieldErrors, setFieldErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const showToast = useToast();
@@ -46,6 +58,7 @@ function CreateProjectModal({ open, onClose, onCreated }) {
   function handleClose() {
     setName('');
     setDescription('');
+    setDeadline('');
     setFieldErrors({});
     onClose();
   }
@@ -54,7 +67,9 @@ function CreateProjectModal({ open, onClose, onCreated }) {
     e.preventDefault();
     setSubmitting(true);
     try {
-      await createProject({ name, description: description || null });
+      // status is not collected here — it's server-defaulted to
+      // "Not Started" on create, editable later via Project Detail.
+      await createProject({ name, description: description || null, deadline: deadline || null });
       showToast('Project created');
       handleClose();
       onCreated();
@@ -84,6 +99,14 @@ function CreateProjectModal({ open, onClose, onCreated }) {
             onChange={(e) => setDescription(e.target.value)}
           />
         </FormField>
+        <FormField label="Deadline" error={fieldErrors.deadline}>
+          <input
+            type="date"
+            className="border border-gray-300 rounded px-3 py-2 w-full focus:ring-2 focus:ring-blue-500"
+            value={deadline}
+            onChange={(e) => setDeadline(e.target.value)}
+          />
+        </FormField>
         <div className="flex justify-end gap-2">
           <Button type="button" variant="secondary" onClick={handleClose}>Cancel</Button>
           <Button type="submit" disabled={submitting}>Create</Button>
@@ -94,20 +117,15 @@ function CreateProjectModal({ open, onClose, onCreated }) {
 }
 
 export default function ProjectList() {
-  const { data, requirements, bugs, loading, refetch } = useProjects();
+  const { data, requirements, bugs, progressById, loading, refetch } = useProjects();
   const [modalOpen, setModalOpen] = useState(false);
   const navigate = useNavigate();
 
-  const statsFor = (projectId) => {
-    const ownedReqs = requirements.filter((r) => r.project_id === projectId);
-    const ownedBugs = bugs.filter((b) => b.project_id === projectId);
-    const done = ownedReqs.filter((r) => r.status === 'Done').length;
-    const fixed = ownedBugs.filter((b) => b.status === 'Fixed').length;
-    const total = ownedReqs.length + ownedBugs.length;
-    // (Done Requirements + Fixed Bugs) / (Total Requirements + Total Bugs) — TRD §6.7
-    const progress = total === 0 ? 0 : Math.round(((done + fixed) / total) * 100);
-    return { requirementCount: ownedReqs.length, bugCount: ownedBugs.length, progress };
-  };
+  const statsFor = (projectId) => ({
+    requirementCount: requirements.filter((r) => r.project_id === projectId).length,
+    bugCount: bugs.filter((b) => b.project_id === projectId).length,
+    progress: progressById[projectId] ?? 0,
+  });
 
   return (
     <div>
@@ -140,6 +158,7 @@ export default function ProjectList() {
               <th className="py-2">Progress</th>
               <th className="py-2">Requirements</th>
               <th className="py-2">Bugs</th>
+              <th className="py-2">Deadline</th>
               <th className="py-2">Created</th>
             </tr>
           </thead>
@@ -156,6 +175,9 @@ export default function ProjectList() {
                   <td className="py-2">{stats.progress}%</td>
                   <td className="py-2">{stats.requirementCount}</td>
                   <td className="py-2">{stats.bugCount}</td>
+                  <td className="py-2 text-gray-500">
+                    {project.deadline ? new Date(project.deadline).toLocaleDateString() : '—'}
+                  </td>
                   <td className="py-2">{new Date(project.created_at).toLocaleDateString()}</td>
                 </tr>
               );

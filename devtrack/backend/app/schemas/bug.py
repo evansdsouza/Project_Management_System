@@ -26,7 +26,9 @@ class BugUpdate(BaseModel):
     priority: Priority | None = None
     requirement_id: int | None = None
     backlog_status: BacklogStatus | None = None
-    fix_notes: str | None = None
+    recomm_fix: str | None = None
+    fix: str | None = None
+    remark: str | None = None
     # status is intentionally absent — use BugStatusUpdate via the /status endpoint instead
 
 
@@ -40,7 +42,9 @@ class BugRead(BugBase):
     id: int
     project_id: int
     status: BugStatus
-    fix_notes: str | None = None
+    recomm_fix: str | None = None
+    fix: str | None = None
+    remark: str | None = None
     created_at: datetime
     updated_at: datetime
 

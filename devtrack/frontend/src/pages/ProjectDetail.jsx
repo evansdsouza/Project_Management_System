@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { getProject } from '../api/projects';
+import { getProject, getProjectProgress } from '../api/projects';
 import { listRequirements } from '../api/requirements';
 import { listBugs } from '../api/bugs';
 import { SkeletonCard } from '../components/Skeleton';
@@ -11,6 +11,7 @@ export default function ProjectDetail() {
   const [project, setProject] = useState(null);
   const [requirements, setRequirements] = useState([]);
   const [bugs, setBugs] = useState([]);
+  const [progress, setProgress] = useState(0);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
@@ -25,21 +26,19 @@ export default function ProjectDetail() {
       .finally(() => setLoading(false));
   }, [id]);
 
+  // Requirements/bugs are still fetched for the total/done summary counts;
+  // the progress % itself comes from the server so the formula lives in
+  // exactly one place (TRD §6.7).
   useEffect(() => {
     listRequirements(id).then(setRequirements).catch(() => setRequirements([]));
     listBugs(id).then(setBugs).catch(() => setBugs([]));
+    getProjectProgress(id).then((d) => setProgress(d.progress)).catch(() => setProgress(0));
   }, [id]);
 
   const totalRequirements = requirements.length;
   const doneRequirements = requirements.filter((r) => r.status === 'Done').length;
   const totalBugs = bugs.length;
   const fixedBugs = bugs.filter((b) => b.status === 'Fixed').length;
-
-  // (Done Requirements + Fixed Bugs) / (Total Requirements + Total Bugs) — TRD §6.7
-  const totalItems = totalRequirements + totalBugs;
-  const progress = totalItems === 0
-    ? 0
-    : Math.round(((doneRequirements + fixedBugs) / totalItems) * 100);
 
   if (loading) return <SkeletonCard />;
 
@@ -54,8 +53,18 @@ export default function ProjectDetail() {
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold">{project.name}</h1>
+      <div className="flex items-center gap-3">
+        <h1 className="text-2xl font-semibold">{project.name}</h1>
+        <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-gray-100 text-gray-700">
+          {project.status}
+        </span>
+      </div>
       {project.description && <p className="text-gray-500 mt-1">{project.description}</p>}
+      {project.deadline && (
+        <p className="text-gray-500 text-sm mt-1">
+          Deadline: {new Date(project.deadline).toLocaleDateString()}
+        </p>
+      )}
 
       <div className="mt-6">
         <div className="flex items-center gap-3">
