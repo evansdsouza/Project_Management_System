@@ -6,3 +6,4 @@ from app.models.project import Project  # noqa: F401
 from app.models.requirement import Requirement  # noqa: F401
 from app.models.bug import Bug  # noqa: F401
 from app.models.bug_status_history import BugStatusHistory  # noqa: F401
+from app.models.time_log import TimeLog  # noqa: F401

@@ -34,4 +34,4 @@ class Requirement(Base):
 
     project: Mapped["Project"] = relationship(back_populates="requirements")
     bugs: Mapped[list["Bug"]] = relationship(back_populates="requirement")
-    # relationship to TimeLog is added in Phase 5
+    time_logs: Mapped[list["TimeLog"]] = relationship(back_populates="requirement")

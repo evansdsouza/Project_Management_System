@@ -21,4 +21,5 @@ class Project(Base):
         back_populates="project", cascade="all, delete-orphan"
     )
     bugs: Mapped[list["Bug"]] = relationship(back_populates="project", cascade="all, delete-orphan")
-    # relationship to TimeLog is added in Phase 5
+    # No cascade — time logs outlive their project (PRD §8 rule 7)
+    time_logs: Mapped[list["TimeLog"]] = relationship(back_populates="project")
