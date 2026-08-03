@@ -4,7 +4,7 @@ from sqlalchemy import text
 
 import app.models  # noqa: F401 — registers all models so relationships resolve
 from app.database import engine
-from app.routers import bugs, projects, requirements
+from app.routers import bugs, projects, requirements, time_logs
 
 app = FastAPI(title="DevTrack API")
 
@@ -18,6 +18,7 @@ app.add_middleware(
 app.include_router(projects.router, prefix="/api/v1")
 app.include_router(requirements.router, prefix="/api/v1")
 app.include_router(bugs.router, prefix="/api/v1")
+app.include_router(time_logs.router, prefix="/api/v1")
 
 
 @app.on_event("startup")

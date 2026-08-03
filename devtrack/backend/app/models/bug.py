@@ -43,4 +43,4 @@ class Bug(Base):
     status_history: Mapped[list["BugStatusHistory"]] = relationship(
         back_populates="bug", cascade="all, delete-orphan", order_by="BugStatusHistory.changed_at"
     )
-    # relationship to TimeLog is added in Phase 5
+    time_logs: Mapped[list["TimeLog"]] = relationship(back_populates="bug")
