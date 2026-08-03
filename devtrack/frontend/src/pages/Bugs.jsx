@@ -36,15 +36,17 @@ function BugModal({ open, onClose, onSaved, projectId, bug, requirements }) {
       priority: bug?.priority ?? 'Medium',
       requirement_id: bug?.requirement_id ? String(bug.requirement_id) : '',
       backlog_status: bug?.backlog_status ?? 'In Backlog',
-      fix_notes: bug?.fix_notes ?? '',
+      recomm_fix: bug?.recomm_fix ?? '',
+      fix: bug?.fix ?? '',
+      remark: bug?.remark ?? '',
     });
     setFieldErrors({});
   }, [open, bug]);
 
   const set = (field) => (e) => setForm((f) => ({ ...f, [field]: e.target.value }));
 
-  // Fix notes only make sense once work has produced a fix — UI/UX §3.5.
-  const showFixNotes = isEdit && (bug?.status === 'Fixed' || bug?.status === 'Partial Fix');
+  // Fix fields only make sense once work has produced a fix — UI/UX §3.5.
+  const showFixFields = isEdit && (bug?.status === 'Fixed' || bug?.status === 'Partial Fix');
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -61,7 +63,11 @@ function BugModal({ open, onClose, onSaved, projectId, bug, requirements }) {
       if (isEdit) {
         // status is deliberately never sent here — it changes only through
         // the row status control, so every change is logged (App Flow §6).
-        if (showFixNotes) payload.fix_notes = form.fix_notes || null;
+        if (showFixFields) {
+          payload.recomm_fix = form.recomm_fix || null;
+          payload.fix = form.fix || null;
+          payload.remark = form.remark || null;
+        }
         await updateBug(bug.id, payload);
         showToast('Bug updated');
       } else {
@@ -108,10 +114,18 @@ function BugModal({ open, onClose, onSaved, projectId, bug, requirements }) {
             {BACKLOG_STATUSES.map((b) => <option key={b} value={b}>{b}</option>)}
           </select>
         </FormField>
-        {showFixNotes && (
-          <FormField label="Fix notes" error={fieldErrors.fix_notes}>
-            <textarea className={INPUT_CLASS} rows={2} value={form.fix_notes ?? ''} onChange={set('fix_notes')} />
-          </FormField>
+        {showFixFields && (
+          <>
+            <FormField label="Recommended Fix" error={fieldErrors.recomm_fix}>
+              <textarea className={INPUT_CLASS} rows={2} value={form.recomm_fix ?? ''} onChange={set('recomm_fix')} />
+            </FormField>
+            <FormField label="Fix Applied" error={fieldErrors.fix}>
+              <textarea className={INPUT_CLASS} rows={2} value={form.fix ?? ''} onChange={set('fix')} />
+            </FormField>
+            <FormField label="Remark" error={fieldErrors.remark}>
+              <textarea className={INPUT_CLASS} rows={2} value={form.remark ?? ''} onChange={set('remark')} />
+            </FormField>
+          </>
         )}
         <div className="flex justify-end gap-2">
           <Button type="button" variant="secondary" onClick={onClose}>Cancel</Button>

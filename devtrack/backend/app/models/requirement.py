@@ -1,6 +1,6 @@
-from datetime import datetime
+from datetime import date, datetime
 
-from sqlalchemy import ForeignKey, String, Text, Enum, func
+from sqlalchemy import Date, ForeignKey, String, Text, Enum, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
@@ -25,7 +25,10 @@ class Requirement(Base):
         Enum(BacklogStatus, name="backlog_status", values_callable=enum_values),
         default=BacklogStatus.IN_BACKLOG,
     )
-    recommended_approach: Mapped[str | None] = mapped_column(Text)
+    recom_appr: Mapped[str | None] = mapped_column(Text)
+    implementation: Mapped[str | None] = mapped_column(Text)
+    remarks: Mapped[str | None] = mapped_column(Text)
+    deadline: Mapped[date | None] = mapped_column(Date)
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(server_default=func.now(), onupdate=func.now())
 

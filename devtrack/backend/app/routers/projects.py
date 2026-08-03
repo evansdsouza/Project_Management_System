@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.crud import project as crud
 from app.database import get_db
-from app.schemas.project import ProjectCreate, ProjectRead, ProjectUpdate
+from app.schemas.project import ProjectCreate, ProjectProgress, ProjectRead, ProjectUpdate
 
 router = APIRouter(prefix="/projects", tags=["projects"])
 
@@ -19,6 +19,13 @@ def get_project(project_id: int, db: Session = Depends(get_db)):
     if project is None:
         raise HTTPException(status_code=404, detail="Project not found")
     return project
+
+
+@router.get("/{project_id}/progress", response_model=ProjectProgress)
+def get_project_progress(project_id: int, db: Session = Depends(get_db)):
+    if crud.get_project(db, project_id) is None:
+        raise HTTPException(status_code=404, detail="Project not found")
+    return ProjectProgress(progress=crud.calculate_progress(db, project_id))
 
 
 @router.post("", response_model=ProjectRead, status_code=201)

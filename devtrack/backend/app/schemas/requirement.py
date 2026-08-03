@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime
 
 from pydantic import BaseModel, ConfigDict
 
@@ -10,7 +10,10 @@ class RequirementBase(BaseModel):
     description: str | None = None
     priority: Priority = Priority.MEDIUM
     backlog_status: BacklogStatus | None = BacklogStatus.IN_BACKLOG
-    recommended_approach: str | None = None
+    recom_appr: str | None = None
+    implementation: str | None = None
+    remarks: str | None = None
+    deadline: date | None = None
 
 
 class RequirementCreate(RequirementBase):
@@ -24,7 +27,10 @@ class RequirementUpdate(BaseModel):
     status: RequirementStatus | None = None
     priority: Priority | None = None
     backlog_status: BacklogStatus | None = None
-    recommended_approach: str | None = None
+    recom_appr: str | None = None
+    implementation: str | None = None
+    remarks: str | None = None
+    deadline: date | None = None
 
 
 class RequirementRead(RequirementBase):

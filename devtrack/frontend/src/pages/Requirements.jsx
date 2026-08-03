@@ -34,7 +34,10 @@ function RequirementModal({ open, onClose, onSaved, projectId, requirement }) {
       priority: requirement?.priority ?? 'Medium',
       status: requirement?.status ?? 'Not Started',
       backlog_status: requirement?.backlog_status ?? 'In Backlog',
-      recommended_approach: requirement?.recommended_approach ?? '',
+      recom_appr: requirement?.recom_appr ?? '',
+      implementation: requirement?.implementation ?? '',
+      remarks: requirement?.remarks ?? '',
+      deadline: requirement?.deadline ?? '',
     });
     setFieldErrors({});
   }, [open, requirement]);
@@ -49,7 +52,10 @@ function RequirementModal({ open, onClose, onSaved, projectId, requirement }) {
       description: form.description || null,
       priority: form.priority,
       backlog_status: form.backlog_status,
-      recommended_approach: form.recommended_approach || null,
+      recom_appr: form.recom_appr || null,
+      implementation: form.implementation || null,
+      remarks: form.remarks || null,
+      deadline: form.deadline || null,
     };
     try {
       if (isEdit) {
@@ -97,12 +103,36 @@ function RequirementModal({ open, onClose, onSaved, projectId, requirement }) {
             {BACKLOG_STATUSES.map((b) => <option key={b} value={b}>{b}</option>)}
           </select>
         </FormField>
-        <FormField label="Recommended Approach" error={fieldErrors.recommended_approach}>
+        <FormField label="Recommended Approach" error={fieldErrors.recom_appr}>
           <textarea
             className={SELECT_CLASS}
             rows={2}
-            value={form.recommended_approach ?? ''}
-            onChange={set('recommended_approach')}
+            value={form.recom_appr ?? ''}
+            onChange={set('recom_appr')}
+          />
+        </FormField>
+        <FormField label="Implementation" error={fieldErrors.implementation}>
+          <textarea
+            className={SELECT_CLASS}
+            rows={2}
+            value={form.implementation ?? ''}
+            onChange={set('implementation')}
+          />
+        </FormField>
+        <FormField label="Remarks" error={fieldErrors.remarks}>
+          <textarea
+            className={SELECT_CLASS}
+            rows={2}
+            value={form.remarks ?? ''}
+            onChange={set('remarks')}
+          />
+        </FormField>
+        <FormField label="Deadline" error={fieldErrors.deadline}>
+          <input
+            type="date"
+            className={SELECT_CLASS}
+            value={form.deadline ?? ''}
+            onChange={set('deadline')}
           />
         </FormField>
         <div className="flex justify-end gap-2">
@@ -178,7 +208,7 @@ export default function Requirements() {
                 <td className="py-2"><Badge value={req.priority} /></td>
                 <td className="py-2"><Badge value={req.status} /></td>
                 <td className="py-2">{req.backlog_status && <Badge value={req.backlog_status} />}</td>
-                <td className="py-2 text-gray-500">{req.recommended_approach || '—'}</td>
+                <td className="py-2 text-gray-500">{req.recom_appr || '—'}</td>
                 <td className="py-2 text-right">
                   <button className="text-blue-600 hover:underline" onClick={() => openEdit(req)}>
                     Edit
