@@ -6,7 +6,7 @@ import { getProject } from '../api/projects';
 import { Button } from '../components/Button';
 import { Badge } from '../components/Badge';
 import { Modal } from '../components/Modal';
-import { FormField } from '../components/FormField';
+import { FormField, INPUT_CLASS } from '../components/FormField';
 import { EmptyState } from '../components/EmptyState';
 import { ErrorState } from '../components/ErrorState';
 import { SkeletonRow } from '../components/Skeleton';
@@ -17,9 +17,6 @@ import { useToast } from '../components/ToastProvider';
 const BUG_TYPES = ['Logic Error', 'System Error', 'Both'];
 const PRIORITIES = ['Critical', 'High', 'Medium', 'Low'];
 const BACKLOG_STATUSES = ['In Backlog', 'Active'];
-
-const INPUT_CLASS =
-  'border border-gray-300 rounded px-3 py-2 w-full focus:ring-2 focus:ring-blue-500';
 
 function BugModal({ open, onClose, onSaved, projectId, bug, requirements }) {
   const isEdit = Boolean(bug);
@@ -179,7 +176,7 @@ export default function Bugs() {
 
   return (
     <div>
-      <Link to={`/projects/${projectId}`} className="text-sm text-blue-600 hover:underline">
+      <Link to={`/projects/${projectId}`} className="text-sm text-accent hover:underline">
         ← {project?.name ?? 'Project'}
       </Link>
       <div className="flex items-center justify-between mt-2 mb-6">
@@ -198,30 +195,31 @@ export default function Bugs() {
       )}
 
       {!loading && !error && data?.length > 0 && (
+        <div className="bg-card border border-line rounded-xl overflow-hidden">
         <table className="w-full text-sm">
           <thead>
-            <tr className="text-left text-gray-500 border-b border-gray-200">
-              <th className="py-2">Title</th>
-              <th className="py-2">Type</th>
-              <th className="py-2">Status</th>
-              <th className="py-2">Priority</th>
-              <th className="py-2">Linked Requirement</th>
-              <th className="py-2 w-24"></th>
+            <tr className="text-left text-fg-muted border-b border-line bg-panel/60">
+              <th className="px-5 py-3">Title</th>
+              <th className="px-5 py-3">Type</th>
+              <th className="px-5 py-3">Status</th>
+              <th className="px-5 py-3">Priority</th>
+              <th className="px-5 py-3">Linked Requirement</th>
+              <th className="px-5 py-3 w-24"></th>
             </tr>
           </thead>
           <tbody>
             {data.map((bug) => (
-              <tr key={bug.id} className="border-b border-gray-100 hover:bg-gray-50">
-                <td className="py-2">{bug.title}</td>
-                <td className="py-2"><Badge value={bug.type} color="gray" /></td>
-                <td className="py-2">
+              <tr key={bug.id} className="border-b border-line last:border-0 hover:bg-card-hover transition-colors">
+                <td className="px-5 py-3">{bug.title}</td>
+                <td className="px-5 py-3"><Badge value={bug.type} color="gray" /></td>
+                <td className="px-5 py-3">
                   <BugStatusControl bug={bug} onStatusChanged={refetch} />
                 </td>
-                <td className="py-2"><Badge value={bug.priority} /></td>
-                <td className="py-2 text-gray-500">{requirementTitle(bug.requirement_id) || '—'}</td>
-                <td className="py-2">
+                <td className="px-5 py-3"><Badge value={bug.priority} /></td>
+                <td className="px-5 py-3 text-fg-muted">{requirementTitle(bug.requirement_id) || '—'}</td>
+                <td className="px-5 py-3">
                   <div className="flex items-center justify-end gap-2">
-                    <button className="text-blue-600 hover:underline" onClick={() => openEdit(bug)}>
+                    <button className="text-accent hover:underline" onClick={() => openEdit(bug)}>
                       Edit
                     </button>
                     <BugHistoryPopover bugId={bug.id} statusKey={bug.status} />
@@ -231,6 +229,7 @@ export default function Bugs() {
             ))}
           </tbody>
         </table>
+        </div>
       )}
 
       <BugModal

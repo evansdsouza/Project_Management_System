@@ -1,9 +1,9 @@
 const COLORS = {
-  green: 'bg-green-100 text-green-800',
-  blue: 'bg-blue-100 text-blue-800',
-  red: 'bg-red-100 text-red-800',
-  amber: 'bg-amber-100 text-amber-800',
-  gray: 'bg-gray-100 text-gray-700',
+  green: 'bg-ok-bg text-ok-fg border-ok-fg/20',
+  blue: 'bg-info-bg text-info-fg border-info-fg/20',
+  red: 'bg-bad-bg text-bad-fg border-bad-fg/20',
+  amber: 'bg-warn-bg text-warn-fg border-warn-fg/20',
+  gray: 'bg-mute-bg text-mute-fg border-line-strong',
 };
 
 // Every enum value used anywhere in the app, mapped to its badge color per
@@ -18,7 +18,12 @@ const STATUS_COLORS = {
 export function Badge({ value, color }) {
   const resolvedColor = color || STATUS_COLORS[value] || 'gray';
   return (
-    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${COLORS[resolvedColor]}`}>
+    <span
+      className={`inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-full border ${COLORS[resolvedColor]}`}
+    >
+      {/* The dot carries the status at a glance in a dense table, the way the
+          reference's task list does — the label confirms rather than cues. */}
+      <span className="w-1.5 h-1.5 rounded-full bg-current opacity-80" />
       {value}
     </span>
   );

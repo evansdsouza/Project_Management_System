@@ -1,3 +1,5 @@
+import { AlertTriangle } from 'lucide-react';
+
 /**
  * Shown when a fetch fails. Its job is to be distinguishable from EmptyState:
  * "we couldn't load this" and "there is nothing here" look identical to a user
@@ -5,8 +7,11 @@
  */
 export function ErrorState({ message = "Couldn't load this. Check that the API is running.", onRetry }) {
   return (
-    <div className="text-red-700 bg-red-50 border border-red-200 rounded p-3 text-sm flex items-center justify-between gap-4">
-      <span>{message}</span>
+    <div className="flex items-center justify-between gap-4 bg-bad-bg border border-bad-fg/25 text-bad-fg rounded-xl p-4 text-sm">
+      <span className="flex items-center gap-2.5">
+        <AlertTriangle size={16} strokeWidth={1.75} className="shrink-0" />
+        {message}
+      </span>
       {onRetry && (
         <button
           type="button"

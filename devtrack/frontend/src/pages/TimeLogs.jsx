@@ -4,7 +4,7 @@ import { listTimeLogs, createTimeLog, updateTimeLog, deleteTimeLog } from '../ap
 import { listProjects } from '../api/projects';
 import { Button } from '../components/Button';
 import { Modal } from '../components/Modal';
-import { FormField } from '../components/FormField';
+import { FormField, INPUT_CLASS } from '../components/FormField';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { ErrorState } from '../components/ErrorState';
 import { MonthCalendar } from '../components/MonthCalendar';
@@ -17,9 +17,6 @@ import {
   formatWeekTitle, parseDateStr, startOfWeek, toDateStr, todayStr, toTimeInputValue,
   addMinutesToTimeStr, timeStrToMinutes,
 } from '../utils/date';
-
-const INPUT_CLASS =
-  'border border-gray-300 rounded px-3 py-2 w-full focus:ring-2 focus:ring-blue-500';
 
 const VIEWS = ['day', 'week', 'month'];
 
@@ -128,9 +125,9 @@ function TimeLogModal({ open, onClose, onSaved, onDelete, timeLog, projects, def
             <input type="time" className={INPUT_CLASS} value={form.end_time ?? ''} onChange={set('end_time')} />
           </FormField>
         </div>
-        <div className="flex items-baseline justify-between mb-4 px-3 py-2 bg-gray-50 rounded">
-          <span className="text-sm font-medium text-gray-700">Hours logged</span>
-          <span className="text-sm text-gray-900" data-testid="computed-hours">
+        <div className="flex items-baseline justify-between mb-4 px-3 py-2 bg-tile border border-line rounded-lg">
+          <span className="text-sm font-medium text-fg">Hours logged</span>
+          <span className="text-sm font-medium tabular-nums" data-testid="computed-hours">
             {spanHours ? `${spanHours} h` : '—'}
           </span>
         </div>
@@ -283,35 +280,35 @@ export default function TimeLogs() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => step(-1)}
-            className="px-2 py-1 rounded border border-gray-300 text-gray-600 hover:bg-gray-50"
+            className="px-2 py-1.5 rounded-lg border border-line-strong bg-tile text-fg-muted hover:text-fg hover:bg-card-hover transition-colors"
             title="Previous"
           >
             ‹
           </button>
           <button
             onClick={() => navigate(todayStr(), view)}
-            className="px-3 py-1 rounded border border-gray-300 text-sm text-gray-700 hover:bg-gray-50"
+            className="px-3 py-1.5 rounded-lg border border-line-strong bg-tile text-sm text-fg-muted hover:text-fg hover:bg-card-hover transition-colors"
           >
             Today
           </button>
           <button
             onClick={() => step(1)}
-            className="px-2 py-1 rounded border border-gray-300 text-gray-600 hover:bg-gray-50"
+            className="px-2 py-1.5 rounded-lg border border-line-strong bg-tile text-fg-muted hover:text-fg hover:bg-card-hover transition-colors"
             title="Next"
           >
             ›
           </button>
           <span className="ml-2 text-lg font-medium">{title}</span>
-          <span className="ml-2 text-sm text-gray-500">{rangeTotal.toFixed(2)}h logged</span>
+          <span className="ml-2 text-sm text-fg-muted">{rangeTotal.toFixed(2)}h logged</span>
         </div>
 
-        <div className="inline-flex rounded border border-gray-300 overflow-hidden">
+        <div className="inline-flex rounded-lg border border-line-strong overflow-hidden">
           {VIEWS.map((v) => (
             <button
               key={v}
               onClick={() => navigate(anchorStr, v, false)}
               className={`px-3 py-1 text-sm capitalize ${
-                view === v ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'
+                view === v ? 'bg-accent text-white' : 'bg-tile text-fg-muted hover:text-fg hover:bg-card-hover'
               }`}
             >
               {v}
@@ -353,9 +350,9 @@ export default function TimeLogs() {
       )}
 
       {!loading && !error && data.length === 0 && (
-        <p className="text-center text-gray-500 text-sm mt-4">
+        <p className="text-center text-fg-muted text-sm mt-4">
           No time logged in this {view}.{' '}
-          <button onClick={() => openCreate()} className="text-blue-600 hover:underline">
+          <button onClick={() => openCreate()} className="text-accent hover:underline">
             Add a time log
           </button>
         </p>

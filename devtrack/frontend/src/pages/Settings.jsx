@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Button } from '../components/Button';
-import { FormField } from '../components/FormField';
+import { FormField, INPUT_CLASS } from '../components/FormField';
 import { useToast } from '../components/ToastProvider';
 import { DAY_STATUS_CLASSES } from '../utils/timeLogLayout';
 import {
@@ -10,9 +10,6 @@ import {
   setTrackingStartDate,
   DEFAULT_TARGET,
 } from '../hooks/useWorkdaySettings';
-
-const INPUT_CLASS =
-  'border border-gray-300 rounded px-3 py-2 w-full focus:ring-2 focus:ring-blue-500';
 
 export default function Settings() {
   const target = useWorkdayTarget();
@@ -60,7 +57,7 @@ export default function Settings() {
             onChange={(e) => setTargetDraft(e.target.value)}
           />
         </FormField>
-        <p className="text-sm text-gray-500 -mt-2 mb-4">
+        <p className="text-sm text-fg-muted -mt-2 mb-4">
           A day counts as complete once you log this many hours. Default is {DEFAULT_TARGET}.
         </p>
 
@@ -72,7 +69,7 @@ export default function Settings() {
             onChange={(e) => setTrackingDraft(e.target.value)}
           />
         </FormField>
-        <p className="text-sm text-gray-500 -mt-2 mb-4">
+        <p className="text-sm text-fg-muted -mt-2 mb-4">
           Days before this are never marked as missed — set it to when you started
           tracking time so earlier dates stay neutral.
         </p>
@@ -94,7 +91,7 @@ export default function Settings() {
                 className={`inline-block w-8 h-6 rounded ${DAY_STATUS_CLASSES[status]}`}
                 aria-hidden="true"
               />
-              <span className="text-gray-700">{label}</span>
+              <span className="text-fg">{label}</span>
             </li>
           ))}
         </ul>
