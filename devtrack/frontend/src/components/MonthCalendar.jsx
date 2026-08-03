@@ -31,7 +31,10 @@ export function MonthCalendar({
       <div className="grid grid-cols-7 gap-1">
         {cells.map(({ dateStr, date, inMonth }) => {
           const total = dayTotals.get(dateStr) ?? 0;
-          const status = dayStatus(total, dateStr, target, trackingStart);
+          // Stay neutral until the totals actually arrive. Colouring an empty
+          // map would paint every past weekday red for the length of the
+          // fetch, then repaint — a false "you missed everything" flash.
+          const status = loading ? 'neutral' : dayStatus(total, dateStr, target, trackingStart);
           return (
             <button
               key={dateStr}
@@ -49,7 +52,7 @@ export function MonthCalendar({
               ].join(' ')}
             >
               <div className="text-sm font-medium">{date.getDate()}</div>
-              {total > 0 && (
+              {!loading && total > 0 && (
                 <div className="text-xs mt-1 opacity-80">{total.toFixed(2)}h</div>
               )}
             </button>

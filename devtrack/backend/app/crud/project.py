@@ -37,11 +37,23 @@ def delete_project(db: Session, project: Project) -> None:
     db.commit()
 
 
-def calculate_progress(db: Session, project_id: int) -> float:
+def progress_from_counts(req_total: int, req_done: int, bug_total: int, bug_fixed: int) -> float:
     """(Done Requirements + Fixed Bugs) / (Total Requirements + Total Bugs) × 100.
 
-    Never stored — always derived (PRD §8 rule 6). Counted in SQL rather
-    than by loading rows, so this stays cheap as a project grows.
+    The formula itself lives here alone. `calculate_progress` below counts one
+    project; the dashboard counts every project in a single grouped query — but
+    both land on this function, so the two can't drift apart.
+    """
+    total = req_total + bug_total
+    if total == 0:
+        return 0.0
+    return round((req_done + bug_fixed) / total * 100, 1)
+
+
+def calculate_progress(db: Session, project_id: int) -> float:
+    """Progress for a single project. Never stored — always derived
+    (PRD §8 rule 6). Counted in SQL rather than by loading rows, so this
+    stays cheap as a project grows.
     """
     req_total, req_done = db.execute(
         select(
@@ -57,7 +69,4 @@ def calculate_progress(db: Session, project_id: int) -> float:
         ).where(Bug.project_id == project_id)
     ).one()
 
-    total = req_total + bug_total
-    if total == 0:
-        return 0.0
-    return round((req_done + bug_fixed) / total * 100, 1)
+    return progress_from_counts(req_total, req_done, bug_total, bug_fixed)
