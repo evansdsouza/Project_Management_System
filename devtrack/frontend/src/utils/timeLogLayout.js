@@ -48,11 +48,13 @@ export function dayStatus(totalHours, dateStr, target, trackingStart) {
 }
 
 export const DAY_STATUS_CLASSES = {
-  green: 'bg-green-100 text-green-800',
-  blue: 'bg-blue-100 text-blue-800',
-  red: 'bg-red-100 text-red-800',
-  // Quieter than the three signal colours — "unmarked", not a status.
-  neutral: 'bg-gray-50 text-gray-400',
+  green: 'bg-ok-bg text-ok-fg border border-ok-fg/20',
+  blue: 'bg-info-bg text-info-fg border border-info-fg/20',
+  red: 'bg-bad-bg text-bad-fg border border-bad-fg/20',
+  // Quieter than the three signal colours — "unmarked", not a status. On dark
+  // this has to sit *above* the page background to still read as a cell, so
+  // it uses the card surface rather than a lighter tint.
+  neutral: 'bg-card text-fg-faint border border-line',
 };
 
 /**

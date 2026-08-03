@@ -55,8 +55,8 @@ export default function ProjectDetail() {
   if (notFound) {
     return (
       <div className="text-center py-16">
-        <p className="text-gray-500 mb-4">Project not found</p>
-        <Link to="/projects" className="text-blue-600 hover:underline">Back to Project List</Link>
+        <p className="text-fg-muted mb-4">Project not found</p>
+        <Link to="/projects" className="text-accent hover:underline">Back to Project List</Link>
       </div>
     );
   }
@@ -77,46 +77,46 @@ export default function ProjectDetail() {
     <div>
       <div className="flex items-center gap-3">
         <h1 className="text-2xl font-semibold">{project.name}</h1>
-        <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-gray-100 text-gray-700">
+        <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-tile text-fg">
           {project.status}
         </span>
       </div>
-      {project.description && <p className="text-gray-500 mt-1">{project.description}</p>}
+      {project.description && <p className="text-fg-muted mt-1">{project.description}</p>}
       {project.deadline && (
-        <p className="text-gray-500 text-sm mt-1">
+        <p className="text-fg-muted text-sm mt-1">
           Deadline: {new Date(project.deadline).toLocaleDateString()}
         </p>
       )}
 
       <div className="mt-6">
         <div className="flex items-center gap-3">
-          <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
-            <div className="h-full bg-blue-600" style={{ width: `${progress}%` }} />
+          <div className="flex-1 h-2 bg-tile rounded-full overflow-hidden">
+            <div className="h-full bg-accent" style={{ width: `${progress}%` }} />
           </div>
-          <span className="text-sm text-gray-500">{progress}%</span>
+          <span className="text-sm text-fg-muted">{progress}%</span>
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4 mt-6">
-        <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+        <div className="bg-card rounded-xl border border-line p-4">
           <h2 className="text-lg font-semibold mb-1">Requirements</h2>
-          <p className="text-gray-500 text-sm mb-3">
+          <p className="text-fg-muted text-sm mb-3">
             {totalRequirements} total / {doneRequirements} done
           </p>
           <button
-            className="text-blue-600 text-sm hover:underline"
+            className="text-accent text-sm hover:underline"
             onClick={() => navigate(`/projects/${id}/requirements`)}
           >
             Go to Requirements
           </button>
         </div>
-        <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+        <div className="bg-card rounded-xl border border-line p-4">
           <h2 className="text-lg font-semibold mb-1">Bugs</h2>
-          <p className="text-gray-500 text-sm mb-3">
+          <p className="text-fg-muted text-sm mb-3">
             {totalBugs} total / {fixedBugs} fixed
           </p>
           <button
-            className="text-blue-600 text-sm hover:underline"
+            className="text-accent text-sm hover:underline"
             onClick={() => navigate(`/projects/${id}/bugs`)}
           >
             Go to Bugs

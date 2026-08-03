@@ -2,9 +2,9 @@
  *  same percentage reads identically in both places. */
 export function ProgressBar({ value }) {
   return (
-    <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+    <div className="h-1.5 bg-tile rounded-full overflow-hidden">
       <div
-        className="h-full bg-blue-500 rounded-full transition-[width]"
+        className="h-full bg-accent rounded-full transition-[width]"
         style={{ width: `${value}%` }}
       />
     </div>

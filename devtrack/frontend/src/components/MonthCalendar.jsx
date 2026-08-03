@@ -23,7 +23,7 @@ export function MonthCalendar({
     <div>
       <div className="grid grid-cols-7 gap-1 mb-1">
         {WEEKDAY_LABELS.map((label) => (
-          <div key={label} className="text-xs font-medium text-gray-500 text-center py-1">
+          <div key={label} className="text-[11px] font-medium text-fg-faint text-center py-1">
             {label}
           </div>
         ))}
@@ -42,13 +42,13 @@ export function MonthCalendar({
               onClick={() => onSelectDate?.(dateStr)}
               title={`${dateStr} — ${total.toFixed(2)}h logged`}
               className={[
-                'h-20 rounded p-2 text-left transition-colors',
+                'h-20 rounded-lg p-2 text-left transition-colors',
                 DAY_STATUS_CLASSES[status],
                 loading ? 'animate-pulse' : '',
                 inMonth ? '' : 'opacity-40',
-                isToday(dateStr) ? 'ring-2 ring-blue-600 ring-inset' : '',
-                selectedDate === dateStr ? 'ring-2 ring-blue-500' : '',
-                'hover:brightness-95',
+                isToday(dateStr) ? 'ring-2 ring-accent ring-inset' : '',
+                selectedDate === dateStr ? 'ring-2 ring-accent' : '',
+                'hover:brightness-125',
               ].join(' ')}
             >
               <div className="text-sm font-medium">{date.getDate()}</div>

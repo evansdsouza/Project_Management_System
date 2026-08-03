@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { History } from 'lucide-react';
 import { getBugHistory } from '../api/bugs';
 
 export function BugHistoryPopover({ bugId, statusKey }) {
@@ -28,23 +29,27 @@ export function BugHistoryPopover({ bugId, statusKey }) {
 
   return (
     <div className="relative inline-block" ref={ref}>
-      <button onClick={toggle} className="text-gray-400 hover:text-gray-600" title="Status history">
-        🕘
+      <button
+        onClick={toggle}
+        className="text-fg-faint hover:text-fg transition-colors align-middle"
+        title="Status history"
+      >
+        <History size={15} strokeWidth={1.75} />
       </button>
       {open && (
-        <div className="absolute z-10 mt-1 right-0 bg-white border border-gray-200 rounded shadow-md p-3 w-64 text-left">
+        <div className="absolute z-20 mt-1 right-0 bg-card border border-line-strong rounded-lg shadow-2xl p-3 w-64 text-left">
           {history?.length ? (
             <ul className="space-y-2 text-sm">
               {history.map((h) => (
                 <li key={h.id}>
                   <span className="font-medium">{h.status}</span>{' '}
-                  <span className="text-gray-400">{new Date(h.changed_at).toLocaleString()}</span>
-                  {h.note && <p className="text-gray-500">{h.note}</p>}
+                  <span className="text-fg-faint text-xs">{new Date(h.changed_at).toLocaleString()}</span>
+                  {h.note && <p className="text-fg-muted">{h.note}</p>}
                 </li>
               ))}
             </ul>
           ) : (
-            <p className="text-sm text-gray-400">No history yet.</p>
+            <p className="text-sm text-fg-faint">No history yet.</p>
           )}
         </div>
       )}

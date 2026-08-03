@@ -5,7 +5,7 @@ import { getProject } from '../api/projects';
 import { Button } from '../components/Button';
 import { Badge } from '../components/Badge';
 import { Modal } from '../components/Modal';
-import { FormField } from '../components/FormField';
+import { FormField, INPUT_CLASS } from '../components/FormField';
 import { EmptyState } from '../components/EmptyState';
 import { ErrorState } from '../components/ErrorState';
 import { SkeletonRow } from '../components/Skeleton';
@@ -15,8 +15,7 @@ const PRIORITIES = ['Critical', 'High', 'Medium', 'Low'];
 const STATUSES = ['Not Started', 'In Progress', 'Done'];
 const BACKLOG_STATUSES = ['In Backlog', 'Active'];
 
-const SELECT_CLASS =
-  'border border-gray-300 rounded px-3 py-2 w-full focus:ring-2 focus:ring-blue-500';
+const SELECT_CLASS = INPUT_CLASS;
 
 function RequirementModal({ open, onClose, onSaved, projectId, requirement }) {
   const isEdit = Boolean(requirement);
@@ -182,7 +181,7 @@ export default function Requirements() {
 
   return (
     <div>
-      <Link to={`/projects/${projectId}`} className="text-sm text-blue-600 hover:underline">
+      <Link to={`/projects/${projectId}`} className="text-sm text-accent hover:underline">
         ← {project?.name ?? 'Project'}
       </Link>
       <div className="flex items-center justify-between mt-2 mb-6">
@@ -201,27 +200,28 @@ export default function Requirements() {
       )}
 
       {!loading && !error && data?.length > 0 && (
+        <div className="bg-card border border-line rounded-xl overflow-hidden">
         <table className="w-full text-sm">
           <thead>
-            <tr className="text-left text-gray-500 border-b border-gray-200">
-              <th className="py-2">Title</th>
-              <th className="py-2">Priority</th>
-              <th className="py-2">Status</th>
-              <th className="py-2">Backlog</th>
-              <th className="py-2">Recommended Approach</th>
-              <th className="py-2 w-16"></th>
+            <tr className="text-left text-fg-muted border-b border-line bg-panel/60">
+              <th className="px-5 py-3">Title</th>
+              <th className="px-5 py-3">Priority</th>
+              <th className="px-5 py-3">Status</th>
+              <th className="px-5 py-3">Backlog</th>
+              <th className="px-5 py-3">Recommended Approach</th>
+              <th className="px-5 py-3 w-16"></th>
             </tr>
           </thead>
           <tbody>
             {data.map((req) => (
-              <tr key={req.id} className="border-b border-gray-100 hover:bg-gray-50">
-                <td className="py-2">{req.title}</td>
-                <td className="py-2"><Badge value={req.priority} /></td>
-                <td className="py-2"><Badge value={req.status} /></td>
-                <td className="py-2">{req.backlog_status && <Badge value={req.backlog_status} />}</td>
-                <td className="py-2 text-gray-500">{req.recom_appr || '—'}</td>
-                <td className="py-2 text-right">
-                  <button className="text-blue-600 hover:underline" onClick={() => openEdit(req)}>
+              <tr key={req.id} className="border-b border-line last:border-0 hover:bg-card-hover transition-colors">
+                <td className="px-5 py-3">{req.title}</td>
+                <td className="px-5 py-3"><Badge value={req.priority} /></td>
+                <td className="px-5 py-3"><Badge value={req.status} /></td>
+                <td className="px-5 py-3">{req.backlog_status && <Badge value={req.backlog_status} />}</td>
+                <td className="px-5 py-3 text-fg-muted">{req.recom_appr || '—'}</td>
+                <td className="px-5 py-3 text-right">
+                  <button className="text-accent hover:underline" onClick={() => openEdit(req)}>
                     Edit
                   </button>
                 </td>
@@ -229,6 +229,7 @@ export default function Requirements() {
             ))}
           </tbody>
         </table>
+        </div>
       )}
 
       <RequirementModal

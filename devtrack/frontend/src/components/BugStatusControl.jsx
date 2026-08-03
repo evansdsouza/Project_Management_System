@@ -37,11 +37,11 @@ export function BugStatusControl({ bug, onStatusChanged }) {
         <Badge value={bug.status} />
       </button>
       {open && (
-        <div className="absolute z-10 mt-1 bg-white border border-gray-200 rounded shadow-md">
+        <div className="absolute z-20 mt-1 bg-card border border-line-strong rounded-lg shadow-2xl overflow-hidden">
           {STATUS_OPTIONS.map((s) => (
             <button
               key={s}
-              className="block w-full text-left px-3 py-1.5 text-sm hover:bg-gray-50 whitespace-nowrap"
+              className="block w-full text-left px-3 py-1.5 text-sm text-fg-muted hover:text-fg hover:bg-card-hover whitespace-nowrap"
               onClick={() => handleSelect(s)}
             >
               {s}

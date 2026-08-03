@@ -47,10 +47,10 @@ export function HourGrid({
   const showNowLine = nowMinutes >= gridStartMin && nowMinutes <= endHour * 60;
 
   return (
-    <div className="border border-gray-200 rounded-lg overflow-hidden">
+    <div className="border border-line rounded-xl overflow-hidden bg-card">
       {/* Day headers, tinted by the same rule the month cells use — this is
           what makes Day/Week/Month read as one system. */}
-      <div className="flex border-b border-gray-200 bg-white">
+      <div className="flex border-b border-line bg-panel">
         <div className="w-14 shrink-0" />
         {days.map(({ dateStr, date }) => {
           const dayEntries = byDate.get(dateStr) ?? [];
@@ -59,14 +59,14 @@ export function HourGrid({
           return (
             <div
               key={dateStr}
-              className={`flex-1 text-center py-2 border-l border-gray-100 ${DAY_STATUS_CLASSES[status]}`}
+              className={`flex-1 text-center py-2 border-l border-line ${DAY_STATUS_CLASSES[status]}`}
             >
-              <div className="text-xs uppercase tracking-wide opacity-70">
+              <div className="text-[10px] uppercase tracking-wider opacity-70">
                 {date.toLocaleDateString(undefined, { weekday: 'short' })}
               </div>
               <div
                 className={`text-sm font-semibold ${
-                  isToday(dateStr) ? 'underline underline-offset-4' : ''
+                  isToday(dateStr) ? 'underline underline-offset-4 decoration-accent' : ''
                 }`}
               >
                 {date.getDate()}
@@ -83,7 +83,7 @@ export function HourGrid({
             {hours.map((h, i) => (
               <div
                 key={h}
-                className="absolute right-2 text-xs text-gray-400 -translate-y-1/2"
+                className="absolute right-2 text-[11px] text-fg-faint -translate-y-1/2"
                 style={{ top: i * HOUR_PX }}
               >
                 {String(h).padStart(2, '0')}:00
@@ -95,12 +95,12 @@ export function HourGrid({
             const dayEntries = byDate.get(dateStr) ?? [];
             const blocks = layoutEntries(dayEntries, gridStartMin, HOUR_PX);
             return (
-              <div key={dateStr} className="flex-1 relative border-l border-gray-100">
+              <div key={dateStr} className="flex-1 relative border-l border-line">
                 {/* Hour lines double as click targets — no separate hit layer. */}
                 {hours.map((h, i) => (
                   <div
                     key={h}
-                    className="absolute left-0 right-0 border-t border-gray-100 hover:bg-blue-50/40 cursor-pointer"
+                    className="absolute left-0 right-0 border-t border-line hover:bg-accent/10 cursor-pointer"
                     style={{ top: i * HOUR_PX, height: HOUR_PX }}
                     onClick={(e) => handleSlotClick(e, dateStr, h)}
                   />
@@ -108,7 +108,7 @@ export function HourGrid({
 
                 {showNowLine && isToday(dateStr) && (
                   <div
-                    className="absolute left-0 right-0 border-t-2 border-red-500 z-20 pointer-events-none"
+                    className="absolute left-0 right-0 border-t-2 border-bad-fg z-20 pointer-events-none"
                     style={{ top: ((nowMinutes - gridStartMin) / 60) * HOUR_PX }}
                   />
                 )}
@@ -119,7 +119,7 @@ export function HourGrid({
                     type="button"
                     onClick={() => onSelectEntry?.(entry)}
                     title={`${entry.start_time.slice(0, 5)}–${entry.end_time.slice(0, 5)} · ${Number(entry.hours).toFixed(2)} h logged`}
-                    className="absolute z-10 rounded bg-blue-100 border border-blue-300 text-blue-900 text-xs px-1.5 py-1 overflow-hidden text-left hover:bg-blue-200"
+                    className="absolute z-10 rounded-lg bg-accent/25 border border-accent/50 text-fg text-xs px-2 py-1 overflow-hidden text-left hover:bg-accent/40 transition-colors"
                     style={{
                       top,
                       height,
@@ -133,7 +133,7 @@ export function HourGrid({
                     <div className="font-medium truncate">
                       {entry.title || entry.project_name || 'Untitled'}
                     </div>
-                    <div className="opacity-75 truncate">
+                    <div className="opacity-70 truncate text-[11px]">
                       {entry.title && entry.project_name ? `${entry.project_name} · ` : ''}
                       {Number(entry.hours).toFixed(2)} h
                     </div>

@@ -5,7 +5,7 @@ import { listRequirements } from '../api/requirements';
 import { listBugs } from '../api/bugs';
 import { Button } from '../components/Button';
 import { Modal } from '../components/Modal';
-import { FormField } from '../components/FormField';
+import { FormField, INPUT_CLASS } from '../components/FormField';
 import { EmptyState } from '../components/EmptyState';
 import { ErrorState } from '../components/ErrorState';
 import { SkeletonRow } from '../components/Skeleton';
@@ -88,14 +88,14 @@ function CreateProjectModal({ open, onClose, onCreated }) {
       <form onSubmit={handleSubmit}>
         <FormField label="Project Name" error={fieldErrors.name}>
           <input
-            className="border border-gray-300 rounded px-3 py-2 w-full focus:ring-2 focus:ring-blue-500"
+            className={INPUT_CLASS}
             value={name}
             onChange={(e) => setName(e.target.value)}
           />
         </FormField>
         <FormField label="Description" error={fieldErrors.description}>
           <textarea
-            className="border border-gray-300 rounded px-3 py-2 w-full focus:ring-2 focus:ring-blue-500"
+            className={INPUT_CLASS}
             rows={3}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
@@ -104,7 +104,7 @@ function CreateProjectModal({ open, onClose, onCreated }) {
         <FormField label="Deadline" error={fieldErrors.deadline}>
           <input
             type="date"
-            className="border border-gray-300 rounded px-3 py-2 w-full focus:ring-2 focus:ring-blue-500"
+            className={INPUT_CLASS}
             value={deadline}
             onChange={(e) => setDeadline(e.target.value)}
           />
@@ -170,15 +170,16 @@ export default function ProjectList() {
       )}
 
       {!loading && !error && data?.length > 0 && (
+        <div className="bg-card border border-line rounded-xl overflow-hidden">
         <table className="w-full text-sm">
           <thead>
-            <tr className="text-left text-gray-500 border-b border-gray-200">
-              <th className="py-2">Name</th>
-              <th className="py-2">Progress</th>
-              <th className="py-2">Requirements</th>
-              <th className="py-2">Bugs</th>
-              <th className="py-2">Deadline</th>
-              <th className="py-2">Created</th>
+            <tr className="text-left text-fg-muted border-b border-line bg-panel/60">
+              <th className="px-5 py-3">Name</th>
+              <th className="px-5 py-3">Progress</th>
+              <th className="px-5 py-3">Requirements</th>
+              <th className="px-5 py-3">Bugs</th>
+              <th className="px-5 py-3">Deadline</th>
+              <th className="px-5 py-3">Created</th>
             </tr>
           </thead>
           <tbody>
@@ -187,22 +188,23 @@ export default function ProjectList() {
               return (
                 <tr
                   key={project.id}
-                  className="border-b border-gray-100 hover:bg-gray-50 cursor-pointer"
+                  className="border-b border-line last:border-0 hover:bg-card-hover cursor-pointer transition-colors"
                   onClick={() => navigate(`/projects/${project.id}`)}
                 >
-                  <td className="py-2">{project.name}</td>
-                  <td className="py-2">{stats.progress}%</td>
-                  <td className="py-2">{stats.requirementCount}</td>
-                  <td className="py-2">{stats.bugCount}</td>
-                  <td className="py-2 text-gray-500">
+                  <td className="px-5 py-3">{project.name}</td>
+                  <td className="px-5 py-3">{stats.progress}%</td>
+                  <td className="px-5 py-3">{stats.requirementCount}</td>
+                  <td className="px-5 py-3">{stats.bugCount}</td>
+                  <td className="px-5 py-3 text-fg-muted">
                     {project.deadline ? new Date(project.deadline).toLocaleDateString() : '—'}
                   </td>
-                  <td className="py-2">{new Date(project.created_at).toLocaleDateString()}</td>
+                  <td className="px-5 py-3">{new Date(project.created_at).toLocaleDateString()}</td>
                 </tr>
               );
             })}
           </tbody>
         </table>
+        </div>
       )}
 
       <CreateProjectModal

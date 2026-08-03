@@ -4,4 +4,43 @@
 
 body {
   margin: 0;
+  @apply bg-app text-fg;
+}
+
+/* Native form controls default to a light UA palette — date and time inputs
+   would otherwise render a white picker face and a near-invisible glyph on a
+   dark field. This opts them into the browser's dark variants. */
+:root {
+  color-scheme: dark;
+}
+
+/* The picker indicator still comes through near-black; lift it so the small
+   calendar/clock glyph reads against the dark input. */
+input[type='date']::-webkit-calendar-picker-indicator,
+input[type='time']::-webkit-calendar-picker-indicator {
+  filter: invert(0.7);
+  cursor: pointer;
+}
+
+/* Default scrollbars cut a bright stripe down an otherwise dark page. */
+* {
+  scrollbar-color: #2e2e42 transparent;
+  scrollbar-width: thin;
+}
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+*::-webkit-scrollbar-thumb {
+  background: #2e2e42;
+  border-radius: 9999px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: #3c3c55;
+  background-clip: content-box;
 }

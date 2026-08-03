@@ -14,7 +14,7 @@ function KindTag({ kind }) {
   return (
     <span
       className={`text-xs font-medium px-2 py-0.5 rounded-full border ${
-        isBug ? 'border-red-300 text-red-700' : 'border-blue-300 text-blue-700'
+        isBug ? 'border-bad-fg/40 text-bad-fg' : 'border-info-fg/40 text-info-fg'
       }`}
     >
       {isBug ? 'Bug' : 'Requirement'}
@@ -69,13 +69,14 @@ export default function Backlog() {
       )}
 
       {!loading && !error && items?.length > 0 && (
+        <div className="bg-card border border-line rounded-xl overflow-hidden">
         <table className="w-full text-sm">
           <thead>
-            <tr className="text-left text-gray-500 border-b border-gray-200">
-              <th className="py-2">Title</th>
-              <th className="py-2">Type</th>
-              <th className="py-2">Project</th>
-              <th className="py-2">Priority</th>
+            <tr className="text-left text-fg-muted border-b border-line bg-panel/60">
+              <th className="px-5 py-3">Title</th>
+              <th className="px-5 py-3">Type</th>
+              <th className="px-5 py-3">Project</th>
+              <th className="px-5 py-3">Priority</th>
             </tr>
           </thead>
           <tbody>
@@ -84,22 +85,23 @@ export default function Backlog() {
               // collide — the key has to carry the kind as well.
               <tr
                 key={`${item.kind}-${item.id}`}
-                className="border-b border-gray-100 hover:bg-gray-50 cursor-pointer"
+                className="border-b border-line last:border-0 hover:bg-card-hover cursor-pointer transition-colors"
                 onClick={() => openItem(item)}
               >
-                <td className="py-2">{item.title}</td>
-                <td className="py-2">
+                <td className="px-5 py-3">{item.title}</td>
+                <td className="px-5 py-3">
                   <div className="flex items-center gap-1.5">
                     <KindTag kind={item.kind} />
                     {item.type && <Badge value={item.type} />}
                   </div>
                 </td>
-                <td className="py-2 text-gray-600">{item.project_name}</td>
-                <td className="py-2"><Badge value={item.priority} /></td>
+                <td className="px-5 py-3 text-fg-muted">{item.project_name}</td>
+                <td className="px-5 py-3"><Badge value={item.priority} /></td>
               </tr>
             ))}
           </tbody>
         </table>
+        </div>
       )}
     </div>
   );
