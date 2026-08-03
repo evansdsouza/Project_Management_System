@@ -3,10 +3,11 @@ from datetime import date, datetime
 from pydantic import BaseModel, ConfigDict
 
 from app.models.enums import RequirementStatus, Priority, BacklogStatus
+from app.schemas.fields import ItemTitle
 
 
 class RequirementBase(BaseModel):
-    title: str
+    title: ItemTitle
     description: str | None = None
     priority: Priority = Priority.MEDIUM
     backlog_status: BacklogStatus | None = BacklogStatus.IN_BACKLOG
@@ -22,7 +23,7 @@ class RequirementCreate(RequirementBase):
 
 
 class RequirementUpdate(BaseModel):
-    title: str | None = None
+    title: ItemTitle | None = None
     description: str | None = None
     status: RequirementStatus | None = None
     priority: Priority | None = None

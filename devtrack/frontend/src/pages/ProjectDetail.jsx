@@ -4,6 +4,7 @@ import { getProject, getProjectProgress } from '../api/projects';
 import { listRequirements } from '../api/requirements';
 import { listBugs } from '../api/bugs';
 import { SkeletonCard } from '../components/Skeleton';
+import { ErrorState } from '../components/ErrorState';
 
 export default function ProjectDetail() {
   const { id } = useParams();
@@ -14,26 +15,35 @@ export default function ProjectDetail() {
   const [progress, setProgress] = useState(0);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [error, setError] = useState(null);
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     setLoading(true);
     setNotFound(false);
+    setError(null);
     getProject(id)
       .then(setProject)
       .catch((err) => {
+        // A 404 is a real answer — this project doesn't exist. Anything else
+        // (500, network down) is a failure to answer, and must be told apart:
+        // previously both fell through with project still null, and the render
+        // below dereferenced project.name into a blank screen.
         if (err.response?.status === 404) setNotFound(true);
+        else setError(err);
       })
       .finally(() => setLoading(false));
-  }, [id]);
+  }, [id, reloadKey]);
 
   // Requirements/bugs are still fetched for the total/done summary counts;
   // the progress % itself comes from the server so the formula lives in
-  // exactly one place (TRD §6.7).
+  // exactly one place (TRD §6.7). These are secondary to the project itself,
+  // so a failure degrades the counts rather than failing the whole page.
   useEffect(() => {
     listRequirements(id).then(setRequirements).catch(() => setRequirements([]));
     listBugs(id).then(setBugs).catch(() => setBugs([]));
     getProjectProgress(id).then((d) => setProgress(d.progress)).catch(() => setProgress(0));
-  }, [id]);
+  }, [id, reloadKey]);
 
   const totalRequirements = requirements.length;
   const doneRequirements = requirements.filter((r) => r.status === 'Done').length;
@@ -48,6 +58,18 @@ export default function ProjectDetail() {
         <p className="text-gray-500 mb-4">Project not found</p>
         <Link to="/projects" className="text-blue-600 hover:underline">Back to Project List</Link>
       </div>
+    );
+  }
+
+  // Guards the render below, which assumes a project object exists. `error`
+  // covers the known failure paths; the `!project` fallback catches anything
+  // that slips past them rather than letting it blank the page.
+  if (error || !project) {
+    return (
+      <ErrorState
+        message="Couldn't load this project."
+        onRetry={() => setReloadKey((k) => k + 1)}
+      />
     );
   }
 

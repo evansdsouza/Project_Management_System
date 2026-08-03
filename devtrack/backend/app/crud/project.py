@@ -24,6 +24,12 @@ def get_project(db: Session, project_id: int) -> Project | None:
     return db.query(Project).filter(Project.id == project_id).first()
 
 
+def get_project_by_name(db: Session, name: str) -> Project | None:
+    """Backs the uniqueness check on create/update — the DB constraint is the
+    real guarantee, this just lets the API answer with a usable error first."""
+    return db.query(Project).filter(Project.name == name).first()
+
+
 def update_project(db: Session, project: Project, data: ProjectUpdate) -> Project:
     for field, value in data.model_dump(exclude_unset=True).items():
         setattr(project, field, value)
@@ -35,6 +41,26 @@ def update_project(db: Session, project: Project, data: ProjectUpdate) -> Projec
 def delete_project(db: Session, project: Project) -> None:
     db.delete(project)
     db.commit()
+
+
+def counts_by_project(db: Session, model, done_value) -> dict[int, tuple[int, int]]:
+    """(total, completed) per project for one entity table, in a single query.
+
+    Requirements and Bugs are always counted separately rather than joined: a
+    join across both fans out into a cartesian product and multiplies every
+    count by the other table's row count.
+
+    Shared by the Dashboard and Reports, which both need every project's
+    numbers at once and would otherwise issue two queries per project.
+    """
+    rows = db.execute(
+        select(
+            model.project_id,
+            func.count(model.id),
+            func.count(model.id).filter(model.status == done_value),
+        ).group_by(model.project_id)
+    ).all()
+    return {project_id: (total, done) for project_id, total, done in rows}
 
 
 def progress_from_counts(req_total: int, req_done: int, bug_total: int, bug_fixed: int) -> float:

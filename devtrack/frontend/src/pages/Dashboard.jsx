@@ -3,23 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { getDashboard } from '../api/dashboard';
 import { listTimeLogs } from '../api/timeLogs';
 import { Badge } from '../components/Badge';
+import { ProgressBar } from '../components/ProgressBar';
 import { MonthCalendar } from '../components/MonthCalendar';
 import { EmptyState } from '../components/EmptyState';
+import { ErrorState } from '../components/ErrorState';
 import { SkeletonCard } from '../components/Skeleton';
 import { useWorkdayTarget, useTrackingStartDate } from '../hooks/useWorkdaySettings';
 import { sumHoursByDate } from '../utils/timeLogLayout';
 import { buildMonthGrid, formatMonthTitle } from '../utils/date';
-
-function ProgressBar({ value }) {
-  return (
-    <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-      <div
-        className="h-full bg-blue-500 rounded-full transition-[width]"
-        style={{ width: `${value}%` }}
-      />
-    </div>
-  );
-}
 
 // flex-col is load-bearing, not cosmetic: the grid stretches every card to the
 // tallest in its row, and Chrome's UA stylesheet vertically CENTRES a button's
@@ -84,10 +75,14 @@ export default function Dashboard() {
   const [dayTotals, setDayTotals] = useState(() => new Map());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  // Bumped by Retry to re-run the effect; the range strings are stable, so
+  // they alone can't re-trigger it.
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
+    setError(null);
     // Both requests are independent, so they overlap rather than chain.
     Promise.all([getDashboard(), listTimeLogs({ from: rangeFrom, to: rangeTo })])
       .then(([dash, logs]) => {
@@ -98,7 +93,7 @@ export default function Dashboard() {
       .catch((err) => !cancelled && setError(err))
       .finally(() => !cancelled && setLoading(false));
     return () => { cancelled = true; };
-  }, [rangeFrom, rangeTo]);
+  }, [rangeFrom, rangeTo, reloadKey]);
 
   // A date carried without a view opens Time Logs on Day view — the
   // pre-existing deep-link contract that page was built around.
@@ -108,9 +103,10 @@ export default function Dashboard() {
     return (
       <div>
         <h1 className="text-2xl font-semibold mb-6">Dashboard</h1>
-        <p className="text-red-700 bg-red-50 border border-red-200 rounded p-3 text-sm">
-          Couldn&apos;t load the dashboard. Check that the API is running.
-        </p>
+        <ErrorState
+          message="Couldn't load the dashboard."
+          onRetry={() => setReloadKey((k) => k + 1)}
+        />
       </div>
     );
   }

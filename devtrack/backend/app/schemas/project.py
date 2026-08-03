@@ -2,9 +2,11 @@ from datetime import date, datetime
 
 from pydantic import BaseModel, ConfigDict
 
+from app.schemas.fields import ProjectName
+
 
 class ProjectBase(BaseModel):
-    name: str
+    name: ProjectName
     description: str | None = None
     deadline: date | None = None
 
@@ -16,7 +18,7 @@ class ProjectCreate(ProjectBase):
 
 
 class ProjectUpdate(BaseModel):
-    name: str | None = None
+    name: ProjectName | None = None
     description: str | None = None
     status: str | None = None
     deadline: date | None = None

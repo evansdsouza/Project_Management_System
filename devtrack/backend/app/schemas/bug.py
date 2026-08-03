@@ -3,10 +3,11 @@ from datetime import datetime
 from pydantic import BaseModel, ConfigDict
 
 from app.models.enums import BugType, BugStatus, Priority, BacklogStatus
+from app.schemas.fields import ItemTitle
 
 
 class BugBase(BaseModel):
-    title: str
+    title: ItemTitle
     description: str | None = None
     type: BugType
     priority: Priority = Priority.MEDIUM
@@ -20,7 +21,7 @@ class BugCreate(BugBase):
 
 
 class BugUpdate(BaseModel):
-    title: str | None = None
+    title: ItemTitle | None = None
     description: str | None = None
     type: BugType | None = None
     priority: Priority | None = None
