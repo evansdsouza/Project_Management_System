@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { getProject } from '../api/projects';
 import { listRequirements } from '../api/requirements';
+import { listBugs } from '../api/bugs';
 import { SkeletonCard } from '../components/Skeleton';
 
 export default function ProjectDetail() {
@@ -9,6 +10,7 @@ export default function ProjectDetail() {
   const navigate = useNavigate();
   const [project, setProject] = useState(null);
   const [requirements, setRequirements] = useState([]);
+  const [bugs, setBugs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
@@ -25,15 +27,19 @@ export default function ProjectDetail() {
 
   useEffect(() => {
     listRequirements(id).then(setRequirements).catch(() => setRequirements([]));
+    listBugs(id).then(setBugs).catch(() => setBugs([]));
   }, [id]);
 
   const totalRequirements = requirements.length;
   const doneRequirements = requirements.filter((r) => r.status === 'Done').length;
-  // Bugs join this formula in Phase 3 — until then progress reflects
-  // requirements only (TRD §6.7).
-  const progress = totalRequirements === 0
+  const totalBugs = bugs.length;
+  const fixedBugs = bugs.filter((b) => b.status === 'Fixed').length;
+
+  // (Done Requirements + Fixed Bugs) / (Total Requirements + Total Bugs) — TRD §6.7
+  const totalItems = totalRequirements + totalBugs;
+  const progress = totalItems === 0
     ? 0
-    : Math.round((doneRequirements / totalRequirements) * 100);
+    : Math.round(((doneRequirements + fixedBugs) / totalItems) * 100);
 
   if (loading) return <SkeletonCard />;
 
@@ -75,7 +81,9 @@ export default function ProjectDetail() {
         </div>
         <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
           <h2 className="text-lg font-semibold mb-1">Bugs</h2>
-          <p className="text-gray-500 text-sm mb-3">— total / — fixed</p>
+          <p className="text-gray-500 text-sm mb-3">
+            {totalBugs} total / {fixedBugs} fixed
+          </p>
           <button
             className="text-blue-600 text-sm hover:underline"
             onClick={() => navigate(`/projects/${id}/bugs`)}

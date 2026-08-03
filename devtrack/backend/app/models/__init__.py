@@ -4,3 +4,5 @@
 # this module to populate Base.metadata for autogenerate.
 from app.models.project import Project  # noqa: F401
 from app.models.requirement import Requirement  # noqa: F401
+from app.models.bug import Bug  # noqa: F401
+from app.models.bug_status_history import BugStatusHistory  # noqa: F401

@@ -30,4 +30,5 @@ class Requirement(Base):
     updated_at: Mapped[datetime] = mapped_column(server_default=func.now(), onupdate=func.now())
 
     project: Mapped["Project"] = relationship(back_populates="requirements")
-    # relationships to Bug and TimeLog are added in Phase 3 / Phase 5
+    bugs: Mapped[list["Bug"]] = relationship(back_populates="requirement")
+    # relationship to TimeLog is added in Phase 5
