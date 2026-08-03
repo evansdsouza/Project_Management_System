@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { listProjects, createProject, getProjectProgress } from '../api/projects';
 import { listRequirements } from '../api/requirements';
 import { listBugs } from '../api/bugs';
@@ -118,8 +118,21 @@ function CreateProjectModal({ open, onClose, onCreated }) {
 
 export default function ProjectList() {
   const { data, requirements, bugs, progressById, loading, refetch } = useProjects();
-  const [modalOpen, setModalOpen] = useState(false);
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  // ?new=1 lets other pages (the Dashboard's empty state) open this modal
+  // without the modal having to be lifted out of here. Read once at mount:
+  // it's an entry condition, so a later param change shouldn't reopen it.
+  const [modalOpen, setModalOpen] = useState(() => searchParams.get('new') === '1');
+
+  function closeModal() {
+    setModalOpen(false);
+    // Drop the param so a refresh or back-navigation doesn't reopen the modal.
+    if (searchParams.has('new')) {
+      searchParams.delete('new');
+      setSearchParams(searchParams, { replace: true });
+    }
+  }
 
   const statsFor = (projectId) => ({
     requirementCount: requirements.filter((r) => r.project_id === projectId).length,
@@ -188,7 +201,7 @@ export default function ProjectList() {
 
       <CreateProjectModal
         open={modalOpen}
-        onClose={() => setModalOpen(false)}
+        onClose={closeModal}
         onCreated={refetch}
       />
     </div>
