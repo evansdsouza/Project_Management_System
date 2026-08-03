@@ -2,8 +2,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 
+import app.models  # noqa: F401 — registers all models so relationships resolve
 from app.database import engine
-from app.routers import projects
+from app.routers import projects, requirements
 
 app = FastAPI(title="DevTrack API")
 
@@ -15,6 +16,7 @@ app.add_middleware(
 )
 
 app.include_router(projects.router, prefix="/api/v1")
+app.include_router(requirements.router, prefix="/api/v1")
 
 
 @app.on_event("startup")

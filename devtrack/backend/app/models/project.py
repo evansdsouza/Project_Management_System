@@ -15,6 +15,9 @@ class Project(Base):
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(server_default=func.now(), onupdate=func.now())
 
-    # relationships to Requirement, Bug, TimeLog are added here as each
-    # entity is built (Phase 2, 3, 5) — SQLAlchemy can't resolve a string
-    # reference to a class that doesn't exist yet when mappers configure.
+    requirements: Mapped[list["Requirement"]] = relationship(
+        back_populates="project", cascade="all, delete-orphan"
+    )
+    # relationships to Bug and TimeLog are added here as each entity is
+    # built (Phase 3, 5) — SQLAlchemy can't resolve a string reference to
+    # a class that doesn't exist yet when mappers configure.

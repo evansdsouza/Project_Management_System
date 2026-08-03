@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { getProject } from '../api/projects';
+import { listRequirements } from '../api/requirements';
 import { SkeletonCard } from '../components/Skeleton';
 
 export default function ProjectDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [project, setProject] = useState(null);
+  const [requirements, setRequirements] = useState([]);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
@@ -20,6 +22,18 @@ export default function ProjectDetail() {
       })
       .finally(() => setLoading(false));
   }, [id]);
+
+  useEffect(() => {
+    listRequirements(id).then(setRequirements).catch(() => setRequirements([]));
+  }, [id]);
+
+  const totalRequirements = requirements.length;
+  const doneRequirements = requirements.filter((r) => r.status === 'Done').length;
+  // Bugs join this formula in Phase 3 — until then progress reflects
+  // requirements only (TRD §6.7).
+  const progress = totalRequirements === 0
+    ? 0
+    : Math.round((doneRequirements / totalRequirements) * 100);
 
   if (loading) return <SkeletonCard />;
 
@@ -40,16 +54,18 @@ export default function ProjectDetail() {
       <div className="mt-6">
         <div className="flex items-center gap-3">
           <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
-            <div className="h-full bg-blue-600" style={{ width: '0%' }} />
+            <div className="h-full bg-blue-600" style={{ width: `${progress}%` }} />
           </div>
-          <span className="text-sm text-gray-500">0%</span>
+          <span className="text-sm text-gray-500">{progress}%</span>
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4 mt-6">
         <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
           <h2 className="text-lg font-semibold mb-1">Requirements</h2>
-          <p className="text-gray-500 text-sm mb-3">— total / — done</p>
+          <p className="text-gray-500 text-sm mb-3">
+            {totalRequirements} total / {doneRequirements} done
+          </p>
           <button
             className="text-blue-600 text-sm hover:underline"
             onClick={() => navigate(`/projects/${id}/requirements`)}
