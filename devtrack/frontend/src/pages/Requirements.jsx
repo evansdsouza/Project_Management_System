@@ -7,6 +7,7 @@ import { Badge } from '../components/Badge';
 import { Modal } from '../components/Modal';
 import { FormField } from '../components/FormField';
 import { EmptyState } from '../components/EmptyState';
+import { ErrorState } from '../components/ErrorState';
 import { SkeletonRow } from '../components/Skeleton';
 import { useToast } from '../components/ToastProvider';
 
@@ -148,15 +149,21 @@ export default function Requirements() {
   const { id: projectId } = useParams();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [project, setProject] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState(null);
 
   const refetch = useCallback(() => {
     setLoading(true);
+    setError(null);
     listRequirements(projectId)
-      .then(setData)
-      .catch(() => setData([]))
+      .then((rows) => { setData(rows); setError(null); })
+      // Deliberately NOT setData([]): an empty array renders the "No
+      // requirements yet — Add Requirement" empty state, so a server outage
+      // would look like an empty project and invite the user to re-create
+      // work that already exists.
+      .catch(setError)
       .finally(() => setLoading(false));
   }, [projectId]);
 
@@ -185,11 +192,15 @@ export default function Requirements() {
 
       {loading && <div><SkeletonRow /><SkeletonRow /><SkeletonRow /></div>}
 
-      {!loading && data?.length === 0 && (
+      {!loading && error && (
+        <ErrorState message="Couldn't load requirements." onRetry={refetch} />
+      )}
+
+      {!loading && !error && data?.length === 0 && (
         <EmptyState message="No requirements yet" actionLabel="Add Requirement" onAction={openCreate} />
       )}
 
-      {!loading && data?.length > 0 && (
+      {!loading && !error && data?.length > 0 && (
         <table className="w-full text-sm">
           <thead>
             <tr className="text-left text-gray-500 border-b border-gray-200">

@@ -8,6 +8,7 @@ import { Badge } from '../components/Badge';
 import { Modal } from '../components/Modal';
 import { FormField } from '../components/FormField';
 import { EmptyState } from '../components/EmptyState';
+import { ErrorState } from '../components/ErrorState';
 import { SkeletonRow } from '../components/Skeleton';
 import { BugStatusControl } from '../components/BugStatusControl';
 import { BugHistoryPopover } from '../components/BugHistoryPopover';
@@ -141,15 +142,20 @@ export default function Bugs() {
   const [data, setData] = useState(null);
   const [requirements, setRequirements] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [project, setProject] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState(null);
 
   const refetch = useCallback(() => {
     setLoading(true);
+    setError(null);
     listBugs(projectId)
-      .then(setData)
-      .catch(() => setData([]))
+      .then((rows) => { setData(rows); setError(null); })
+      // Deliberately NOT setData([]): that renders the "No bugs yet" empty
+      // state, so an API outage would read as a clean project rather than a
+      // failure — the most misleading possible message on a bug tracker.
+      .catch(setError)
       .finally(() => setLoading(false));
   }, [projectId]);
 
@@ -183,11 +189,15 @@ export default function Bugs() {
 
       {loading && <div><SkeletonRow /><SkeletonRow /><SkeletonRow /></div>}
 
-      {!loading && data?.length === 0 && (
+      {!loading && error && (
+        <ErrorState message="Couldn't load bugs." onRetry={refetch} />
+      )}
+
+      {!loading && !error && data?.length === 0 && (
         <EmptyState message="No bugs yet" actionLabel="Add Bug" onAction={openCreate} />
       )}
 
-      {!loading && data?.length > 0 && (
+      {!loading && !error && data?.length > 0 && (
         <table className="w-full text-sm">
           <thead>
             <tr className="text-left text-gray-500 border-b border-gray-200">

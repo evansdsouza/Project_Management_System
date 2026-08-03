@@ -1,29 +1,12 @@
-from sqlalchemy import func, nulls_last, select
+from sqlalchemy import nulls_last, select
 from sqlalchemy.orm import Session
 
-from app.crud.project import progress_from_counts
+from app.crud.project import counts_by_project, progress_from_counts
 from app.models.bug import Bug
 from app.models.enums import BugStatus, RequirementStatus
 from app.models.project import Project
 from app.models.requirement import Requirement
 from app.schemas.dashboard import DashboardProject, DashboardRead, TopRequirement
-
-
-def _counts_by_project(db: Session, model, done_value) -> dict[int, tuple[int, int]]:
-    """(total, completed) per project for one entity table, in a single query.
-
-    Requirements and Bugs are counted separately rather than joined: a join
-    across both would fan out into a cartesian product and multiply every
-    count by the other table's row count.
-    """
-    rows = db.execute(
-        select(
-            model.project_id,
-            func.count(model.id),
-            func.count(model.id).filter(model.status == done_value),
-        ).group_by(model.project_id)
-    ).all()
-    return {project_id: (total, done) for project_id, total, done in rows}
 
 
 def _top_requirement_by_project(db: Session) -> dict[int, Requirement]:
@@ -62,8 +45,8 @@ def _top_requirement_by_project(db: Session) -> dict[int, Requirement]:
 def get_dashboard(db: Session) -> DashboardRead:
     """Four queries total, independent of how many projects exist."""
     projects = db.scalars(select(Project).order_by(Project.created_at)).all()
-    req_counts = _counts_by_project(db, Requirement, RequirementStatus.DONE)
-    bug_counts = _counts_by_project(db, Bug, BugStatus.FIXED)
+    req_counts = counts_by_project(db, Requirement, RequirementStatus.DONE)
+    bug_counts = counts_by_project(db, Bug, BugStatus.FIXED)
     top_requirements = _top_requirement_by_project(db)
 
     return DashboardRead(

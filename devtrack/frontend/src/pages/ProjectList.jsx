@@ -7,6 +7,7 @@ import { Button } from '../components/Button';
 import { Modal } from '../components/Modal';
 import { FormField } from '../components/FormField';
 import { EmptyState } from '../components/EmptyState';
+import { ErrorState } from '../components/ErrorState';
 import { SkeletonRow } from '../components/Skeleton';
 import { useToast } from '../components/ToastProvider';
 
@@ -20,6 +21,7 @@ function useProjects() {
 
   const refetch = useCallback(() => {
     setLoading(true);
+    setError(null);
     // One unfiltered call each for the count columns — avoids firing
     // separate list requests per row. Progress comes from the server's
     // endpoint so the formula isn't duplicated here.
@@ -117,7 +119,7 @@ function CreateProjectModal({ open, onClose, onCreated }) {
 }
 
 export default function ProjectList() {
-  const { data, requirements, bugs, progressById, loading, refetch } = useProjects();
+  const { data, requirements, bugs, progressById, loading, error, refetch } = useProjects();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   // ?new=1 lets other pages (the Dashboard's empty state) open this modal
@@ -155,7 +157,11 @@ export default function ProjectList() {
         </div>
       )}
 
-      {!loading && data?.length === 0 && (
+      {!loading && error && (
+        <ErrorState message="Couldn't load projects." onRetry={refetch} />
+      )}
+
+      {!loading && !error && data?.length === 0 && (
         <EmptyState
           message="No projects yet"
           actionLabel="New Project"
@@ -163,7 +169,7 @@ export default function ProjectList() {
         />
       )}
 
-      {!loading && data?.length > 0 && (
+      {!loading && !error && data?.length > 0 && (
         <table className="w-full text-sm">
           <thead>
             <tr className="text-left text-gray-500 border-b border-gray-200">

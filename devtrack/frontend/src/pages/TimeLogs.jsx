@@ -6,6 +6,7 @@ import { Button } from '../components/Button';
 import { Modal } from '../components/Modal';
 import { FormField } from '../components/FormField';
 import { ConfirmDialog } from '../components/ConfirmDialog';
+import { ErrorState } from '../components/ErrorState';
 import { MonthCalendar } from '../components/MonthCalendar';
 import { HourGrid } from '../components/HourGrid';
 import { useToast } from '../components/ToastProvider';
@@ -177,6 +178,7 @@ export default function TimeLogs() {
   const [data, setData] = useState([]);
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [modalDefaults, setModalDefaults] = useState(null);
@@ -214,9 +216,12 @@ export default function TimeLogs() {
 
   const refetch = useCallback(() => {
     setLoading(true);
+    setError(null);
     listTimeLogs({ from: rangeStart, to: rangeEnd })
-      .then(setData)
-      .catch(() => setData([]))
+      .then((rows) => { setData(rows); setError(null); })
+      // Not setData([]): an empty grid reads as "you logged nothing this
+      // week", which is exactly the wrong conclusion to draw from an outage.
+      .catch(setError)
       .finally(() => setLoading(false));
   }, [rangeStart, rangeEnd]);
 
@@ -341,7 +346,13 @@ export default function TimeLogs() {
         />
       )}
 
-      {!loading && data.length === 0 && (
+      {!loading && error && (
+        <div className="mt-4">
+          <ErrorState message="Couldn't load time logs." onRetry={refetch} />
+        </div>
+      )}
+
+      {!loading && !error && data.length === 0 && (
         <p className="text-center text-gray-500 text-sm mt-4">
           No time logged in this {view}.{' '}
           <button onClick={() => openCreate()} className="text-blue-600 hover:underline">
